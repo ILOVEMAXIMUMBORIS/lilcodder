@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lilcodder — DJ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      color: white;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 30%),
+        linear-gradient(135deg, #050510 0%, #090914 45%, #120a22 100%);
+      position: relative;
+    }
+
+    /* Базовый фон */
+    .bg-base {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(124, 58, 237, 0.10), transparent 30%),
+        linear-gradient(135deg, #050510 0%, #090914 45%, #120a22 100%);
+    }
+
+    /* Реактивное свечение */
+    #bg-reactive {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: 700px;
+      height: 700px;
+      transform: translate(-50%, -50%) scale(1);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.30) 0%, rgba(59, 130, 246, 0.18) 35%, rgba(236, 72, 153, 0.10) 55%, transparent 72%);
+      filter: blur(120px);
+      opacity: 0.35;
+      transition: transform 0.08s linear, opacity 0.08s linear, filter 0.08s linear;
+    }
+
+    .card {
+      position: relative;
+      z-index: 2;
+      width: min(760px, calc(100% - 32px));
+      padding: 52px 36px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    .subtitle {
+      font-size: 13px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(200, 180, 255, 0.9);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: clamp(56px, 10vw, 100px);
+      line-height: 1;
+      font-weight: 800;
+      text-transform: lowercase;
+      margin-bottom: 18px;
+      text-shadow: 0 0 24px rgba(255, 255, 255, 0.22);
+    }
+
+    .description {
+      font-size: clamp(16px, 2vw, 21px);
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.88);
+      margin-bottom: 28px;
+    }
+
+    .info {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .tag {
+      padding: 11px 18px;
+      border-radius: 999px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(167, 139, 250, 0.25);
+      color: #f5edff;
+      font-size: 15px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.72);
+      padding: 20px;
+    }
+
+    .popup {
+      width: min(420px, 100%);
+      background: rgba(13, 13, 20, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 24px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .popup h2 {
+      font-size: 24px;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    .popup p {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .popup button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .popup button:hover {
+      transform: translateY(-2px);
+    }
+
+    .yes {
+      background: #7c3aed;
+      color: white;
+    }
+
+    .no {
+      background: rgba(255, 255, 255, 0.10);
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 38px 22px;
+      }
+
+      .subtitle {
+        font-size: 11px;
+        letter-spacing: 0.22em;
+      }
+
+      .description {
+        font-size: 15px;
+      }
+
+      .tag {
+        width: 100%;
+      }
+
+      #bg-reactive {
+        width: 420px;
+        height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-base"></div>
+  <div id="bg-reactive"></div>
+
+  <div class="overlay" id="popup">
+    <div class="popup">
+      <h2>Включим музыку для атмосферы?</h2>
+      <p>Можно запустить мой сет прямо на фоне сайта.</p>
+      <div class="popup-buttons">
+        <button class="yes" onclick="playMusic()">Да</button>
+        <button class="no" onclick="closePopup()">Нет</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="music" src="music.mp3" preload="auto"></audio>
+
+  <main class="card">
+    <div class="subtitle">DJ</div>
+    <h1>lilcodder</h1>
+    <p class="description">
+      DJ из Челябинска. Делаю атмосферные сеты, качаю танцпол и собираю вайб,
+      который запоминается.
+    </p>
+
+    <div class="info">
+      <div class="tag">г. Челябинск</div>
+      <div class="tag">Стаж: 1 год</div>
+      <div class="tag">Открыт для сотрудничества</div>
+    </div>
+  </main>
+
+  <script>
+    const popup = document.getElementById('popup');
+    const music = document.getElementById('music');
+    const reactiveBg = document.getElementById('bg-reactive');
+
+    music.volume = 0.08;
+
+    let audioCtx = null;
+    let analyser = null;
+    let source = null;
+    let dataArray = null;
+    let animationStarted = false;
+
+    function showPopup() {
+      popup.style.display = 'flex';
+    }
+
+    function hidePopup() {
+      popup.style.display = 'none';
+    }
+
+    function setupAudioAnalysis() {
+      if (audioCtx) return;
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 128;
+
+      source = audioCtx.createMediaElementSource(music);
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+    function animateReactiveBg() {
+      if (!analyser || !dataArray) return;
+
+      analyser.getByteFrequencyData(dataArray);
+
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+
+      const avg = sum / dataArray.length;
+      const intensity = avg / 255;
+
+      const scale = 1 + intensity * 0.55;
+      const opacity = 0.24 + intensity * 0.55;
+      const blur = 110 + intensity * 40;
+
+      reactiveBg.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      reactiveBg.style.opacity = opacity;
+      reactiveBg.style.filter = `blur(${blur}px)`;
+
+      requestAnimationFrame(animateReactiveBg);
+    }
+
+    async function playMusic() {
+      try {
+        localStorage.setItem('musicChoice', 'yes');
+        hidePopup();
+
+        setupAudioAnalysis();
+
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume();
+        }
+
+        await music.play();
+
+        if (!animationStarted) {
+          animationStarted = true;
+          animateReactiveBg();
+        }
+      } catch (error) {
+        console.error('Не удалось включить музыку:', error);
+      }
+    }
+
+    function closePopup() {
+      localStorage.setItem('musicChoice', 'no');
+      hidePopup();
+    }
+
+    window.addEventListener('load', () => {
+      const musicChoice = localStorage.getItem('musicChoice');
+
+      if (musicChoice === 'no') {
+        hidePopup();
+      } else {
+        showPopup();
+      }
+    });
+  </script>
+</body>
+</html>
